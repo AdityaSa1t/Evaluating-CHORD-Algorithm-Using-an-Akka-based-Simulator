@@ -24,7 +24,7 @@ class UserActor(id: Int) extends Actor with ActorLogging {
 }
 
 /**
-  * This singleton class is a companion to UserActor. It defines all possible actions defines on an instance of a UserActor.
+  * This singleton class is a companion to UserActor. It defines all possible messages that can be handled by an instance of a UserActor.
   * */
 object UserActor {
 
