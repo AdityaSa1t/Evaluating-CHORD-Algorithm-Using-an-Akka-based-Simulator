@@ -31,7 +31,7 @@ object ActorSystemDriver {
 
     try {
 
-      // Detect an I/O input to move to a new line
+      // Detect an external input to move to a new line
       StdIn.readLine
     } finally {
 
