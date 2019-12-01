@@ -1,36 +1,31 @@
 package com.akka.user
 
-import akka.actor.{Actor, ActorLogging, Props}
-import com.akka.user.UserActor.CreateUserActorWithId
+import akka.actor.{Actor, ActorContext, ActorLogging, ActorPath, ActorRef, ActorSystem, Props}
+import com.akka.data.Request
+import com.akka.dispatcher.DispatcherActor.ProcessRequestFromUser
+import com.akka.user.UserActor.{CreateUserActorWithId, DispatchMessageToDispatcher}
 
-/**
-  * This class denotes a user actor.
-  * */
-class UserActor(id: Int) extends Actor with ActorLogging {
+class UserActor(userId: Int) extends Actor with ActorLogging {
+  override def receive: Receive = {
 
-  override def receive = {
+    case CreateUserActorWithId(userId) =>
+      val userActor = context.actorOf(Props(new UserActor(userId)), "user-actor-" + userId)
+      log.info("Created user actor {}", userActor.path.toString)
 
-    case CreateUserActorWithId(userId) => {
-
-      log.info("Response to create user actor with id : {} received", userId)
-
-      // Create a child actor
-      val userActor = context.actorOf(UserActor.userId(userId), "user-actor-" + userId)
-
-      log.info("User actor {} created", userActor.path.toString)
-    }
+    case DispatchMessageToDispatcher(to, request) =>
+      log.info("Message received from {}", context.self.path.toString)
+      log.info("Message to be dispatched to {}", to.path.toString)
+      to ! ProcessRequestFromUser(request)
   }
 
 }
 
-/**
-  * This singleton class is a companion to UserActor. It defines all possible messages that can be handled by an instance of a UserActor.
-  * */
+
 object UserActor {
 
-  // Sealed class which denotes a message to spawn a user actor with some user id
+  def userId(userId: Int): Props = Props(new UserActor(userId))
+
   sealed case class CreateUserActorWithId(userId: Int)
 
-  // Immutable user id property, try to ensure this property is unique across all users
-  def userId(id: Int): Props = Props(new UserActor(id))
+  sealed case class DispatchMessageToDispatcher(to: ActorRef, request: Request)
 }

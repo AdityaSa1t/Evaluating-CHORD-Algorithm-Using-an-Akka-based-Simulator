@@ -25,7 +25,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.0",
 
   // Akka dependency for creating and managing clusters
-  "com.typesafe.akka" %% "akka-cluster-typed" % "2.6.0"
+  "com.typesafe.akka" %% "akka-cluster-typed" % "2.6.0",
+
+  "com.typesafe.akka" %% "akka-actor-testkit-typed" % "2.6.0" % Test,
+
+  "com.typesafe.akka" %% "akka-remote" % "2.6.0"
 
 )
 
