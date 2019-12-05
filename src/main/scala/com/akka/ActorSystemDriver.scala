@@ -3,6 +3,7 @@ package com.akka
 import akka.actor.{ActorSystem, Props}
 import com.akka.data.{Data, Request}
 import com.akka.dispatcher.DispatcherActor
+import com.akka.master.MasterActor
 import com.akka.server.ServerActor
 import com.akka.server.ServerActor.CreateServerActorWithId
 import com.akka.user.UserActor
@@ -14,8 +15,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.io.StdIn
 
 /**
-  * This singleton class represents a driver class which creates a system of Akka actors.
-  **/
+ * This singleton class represents a driver class which creates a system of Akka actors.
+ **/
 object ActorSystemDriver {
 
   private val usersConf = ConfigFactory.load("users.conf").getConfig("users-conf")
@@ -31,43 +32,33 @@ object ActorSystemDriver {
     movieData += Data(4, "Count of Monte Cristo")
     movieData += Data(5, "V for Vendetta")
 
+    val numUsers = usersConf.getInt("num-users")
+    val numServers = serversConf.getInt("num-servers")
 
     val userActorSystem = ActorSystem("user-actor-system")
     val dispatcherActorSystem = ActorSystem("dispatcher-actor-system")
     val serverActorSystem = ActorSystem("server-actor-system")
 
     val userActorSupervisor = userActorSystem.actorOf(Props(new UserActor(1)), "user-actor-supervisor")
-    val serverActorSupervisor = serverActorSystem.actorOf(Props(new ServerActor(1, "")), "server-actor-supervisor")
-    val dispatcherActor = dispatcherActorSystem.actorOf(Props(new DispatcherActor(serverActorSystem)), "dispatcher-actor")
+    val serverActorSupervisor = serverActorSystem.actorOf(Props(new ServerActor(1, numServers)), "server-actor-supervisor")
+    val masterActor = serverActorSystem.actorOf(Props[MasterActor], "master-actor")
 
 
-    (1 to usersConf.getInt("num-users")).foreach {
+
+    (1 to numUsers).foreach {
       i =>
         userActorSupervisor ! CreateUserActorWithId(i + 1)
     }
 
-    (1 to serversConf.getInt("num-servers")).foreach {
+    (1 to numServers).foreach {
       i =>
-        val dataList = new mutable.ArrayBuffer[Data]()
-        dataList += movieData(i - 1)
-        serverActorSupervisor ! CreateServerActorWithId(i + 1, dataList(0).movieName)
+        serverActorSupervisor ! CreateServerActorWithId(i + 1, numServers)
     }
 
-    val userActor = userActorSystem.actorSelection("akka://user-actor-system/user/user-actor-supervisor/user-actor-11")
-    userActor ! DispatchMessageToDispatcher(dispatcherActor, Request("akka://server-actor-system/user/server-actor-supervisor/server-actor-3"))
-    userActor ! DispatchMessageToDispatcher(dispatcherActor, Request("akka://server-actor-system/user/server-actor-supervisor/server-actor-2"))
-    userActor ! DispatchMessageToDispatcher(dispatcherActor, Request("akka://server-actor-system/user/server-actor-supervisor/server-actor-6"))
-    userActor ! DispatchMessageToDispatcher(dispatcherActor, Request("akka://server-actor-system/user/server-actor-supervisor/server-actor-4"))
-    userActor ! DispatchMessageToDispatcher(dispatcherActor, Request("akka://server-actor-system/user/server-actor-supervisor/server-actor-5"))
-
-
     try {
-
       // Detect an external input to move to a new line
       StdIn.readLine
-
     } finally {
-
       // Terminates the user actor system
       userActorSystem.terminate
       serverActorSystem.terminate
