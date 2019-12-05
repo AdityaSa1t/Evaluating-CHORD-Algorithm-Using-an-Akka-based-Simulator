@@ -34,6 +34,16 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       masterActor ! AddNodeToRing(HashUtils.generateHash(serverId.toString, maxFingerTableEntries, "SHA-1"), serverActor.path.toString)
 
     case UpdateFingerTable(hashedNodes) =>
+      val treeSet = new mutable.TreeSet[Int]()
+
+      hashedNodes.foreach {
+        node =>
+          treeSet += Integer.parseInt(node, 16)
+      }
+
+      fingerTable = ServerActor.setSuccessor(treeSet, fingerTable)
+
+
       log.info("Update finger table of server with path {}", self.path)
 
 
@@ -52,7 +62,15 @@ object ServerActor {
 
   def serverId(serverId: Int, maxFingerTableEntries: Int): Props = Props(new ServerActor(serverId, maxFingerTableEntries))
 
-  def setSuccessor = {
-
-  }
+  def setSuccessor(treeSet: mutable.TreeSet[Int], fingerTableEntry: mutable.HashMap[Int, FingerTableEntry]): mutable.HashMap[Int, FingerTableEntry] = {
+  /*  fingerTableEntry.map {
+      fingerTableEntry =>
+      val tempTreeSet = treeSet.filter(x => x >= fingerTableEntry._1)
+        if (tempTreeSet.size == 1) {
+          fingerTableEntry
+        } else {
+          treeSet
+        }
+    }
+  */}
 }
