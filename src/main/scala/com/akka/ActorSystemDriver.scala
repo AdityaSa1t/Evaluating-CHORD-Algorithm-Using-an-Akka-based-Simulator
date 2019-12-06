@@ -30,7 +30,7 @@ object ActorSystemDriver {
 
     movies.indices.foreach {
       i =>
-        movieData += Data(i, movies(i))
+        movieData += Data(i, movies(i).movieName)
     }
 
 
