@@ -1,6 +1,7 @@
 package com.akka
 
 import akka.actor.{ActorSystem, Props}
+import akka.util.Timeout
 import com.akka.data.Data
 import com.akka.master.MasterActor
 import com.akka.server.ServerActor
@@ -8,10 +9,19 @@ import com.akka.server.ServerActor.CreateServerActorWithId
 import com.akka.user.{DataUtil, UserActor}
 import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId}
 import com.typesafe.config.ConfigFactory
+import akka.util._
+
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.io.StdIn
+
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.Future
+import akka.pattern.ask
+import akka.util.Timeout
 
 /**
  * This singleton class represents a driver class which creates a system of Akka actors.
@@ -52,18 +62,23 @@ object ActorSystemDriver {
         userActorSupervisor ! CreateUserActorWithId(i + 1)
     }
 
-    (1 to numServers).foreach {
-      i =>
-        serverActorSupervisor ! CreateServerActorWithId(i + 1, numServers)
+        implicit val timeout = Timeout(5 seconds)
+        var future = serverActorSupervisor ? CreateServerActorWithId(4, numServers)
+
+        var result: Future[Int] = Await.result(future, timeout.duration).asInstanceOf[Future[Int]]
+        println(result)
+
+
+    if (result.isCompleted) {
+
+      val userActor = userActorSystem.actorSelection("akka://user-actor-system/user/user-actor-supervisor/user-actor-3")
+      userActor ! AddFileToServer(movieData(3))
+      userActor ! AddFileToServer(movieData(6))
+      userActor ! AddFileToServer(movieData(2))
+      userActor ! AddFileToServer(movieData(19))
+      userActor ! AddFileToServer(movieData(20))
+
     }
-
-    val userActor = userActorSystem.actorSelection("akka://user-actor-system/user/user-actor-supervisor/user-actor-3")
-    userActor ! AddFileToServer(movieData(3))
-    userActor ! AddFileToServer(movieData(6))
-    userActor ! AddFileToServer(movieData(2))
-    userActor ! AddFileToServer(movieData(19))
-    userActor ! AddFileToServer(movieData(20))
-
 
     try {
       // Detect an external input to move to a new line

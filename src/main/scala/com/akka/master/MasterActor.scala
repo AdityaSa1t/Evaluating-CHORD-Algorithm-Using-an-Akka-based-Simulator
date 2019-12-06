@@ -33,10 +33,12 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       log.info("Hashed set : {}", serverActorHashedTreeSet)
       log.info("Context paths : {}", contextPaths)
 
+      sender() ! numNodesInRing
+
     case LoadFileToServer(data) =>
       val dataHashedValue = HashUtils.generateHash(data.id.toString, maxNodesInRing, "SHA-1")
       log.info("Size of server actor hashed tree set : {}", serverActorHashedTreeSet.size)
- /*     val tempTreeSet = serverActorHashedTreeSet.filter(x => x > dataHashedValue.toInt)
+     val tempTreeSet = serverActorHashedTreeSet.filter(x => x > dataHashedValue.toInt)
       val serverHash = if (tempTreeSet.nonEmpty) {
         tempTreeSet.head
       } else {
@@ -44,7 +46,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       }
       val serverActor = context.system.actorSelection(mapContextToHash(serverHash))
       serverActor ! LoadData(data)
- */ }
+  }
 }
 
 object MasterActor {

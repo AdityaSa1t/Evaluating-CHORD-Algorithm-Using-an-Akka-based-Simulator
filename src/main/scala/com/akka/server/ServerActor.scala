@@ -6,7 +6,12 @@ import com.akka.master.MasterActor.AddNodeToRing
 import com.akka.server.ServerActor._
 import com.akka.utils.HashUtils
 
+import scala.concurrent.duration._
+import akka.pattern.ask
+import akka.util.Timeout
+
 import scala.collection.mutable
+import scala.concurrent.Await
 
 class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with ActorLogging {
 
@@ -30,7 +35,15 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       val masterActor = context.system.actorSelection("akka://server-actor-system/user/master-actor")
       val hashedValue = HashUtils.generateHash(serverId.toString, maxFingerTableEntries, "SHA-1")
       serverActor ! InitFingerTable(hashedValue)
-      masterActor ! AddNodeToRing(hashedValue, serverActor.path.toString)
+
+      implicit val timeout = Timeout(5 seconds)
+      var no_of_nodes = masterActor ? AddNodeToRing(hashedValue, serverActor.path.toString)
+
+      val result = Await.result(no_of_nodes, timeout.duration)
+      println("Server Actor -> " +result)
+
+      sender() ! no_of_nodes
+
 
     case UpdateFingerTable(hashedNodes) =>
       fingerTable = ServerActor.setSuccessor(hashedNodes, fingerTable)
