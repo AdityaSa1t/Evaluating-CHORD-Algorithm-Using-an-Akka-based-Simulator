@@ -5,22 +5,26 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
-
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import com.akka.data.Data
+
 import scala.io.StdIn
 
 object DataUtil extends App {
 
-  def returnData:List[String]={
+  def returnData:List[Data]={
     val res: ListBuffer[String] = new ListBuffer[String]
+    val resData: ListBuffer[Data] = new ListBuffer[Data]
     val lines = Source.fromFile("./src/main/resources/data.csv")
+    var i : Int= 0
     for (line <- lines.getLines.drop(1)) {
       val cols = line.split(",")
-      res += cols(0)
+      resData += Data(i,cols(0))
+      i = i+1
     }
-    res.toList
+    resData.toList
     }
 
  /* def main:Unit={
