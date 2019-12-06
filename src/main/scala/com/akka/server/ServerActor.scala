@@ -37,9 +37,10 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       val treeSet = new mutable.TreeSet[Int]()
       hashedNodes.foreach {
         node =>
-          treeSet += Integer.parseInt(node, 16)
+          treeSet += Integer.parseInt(node, 10)
       }
       fingerTable = ServerActor.setSuccessor(treeSet, fingerTable)
+      log.info("Updated finger table : {}", fingerTable)
 
 
   }
