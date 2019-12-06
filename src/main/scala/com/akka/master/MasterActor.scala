@@ -2,7 +2,7 @@ package com.akka.master
 
 import akka.actor.{Actor, ActorLogging}
 import com.akka.data.Data
-import com.akka.master.MasterActor.{AddNodeToRing, LoadFileToServer}
+import com.akka.master.MasterActor.{AddNodeToRing, InitializationDone, LoadFileToServer}
 import com.akka.server.ServerActor.{LoadData, UpdateFingerTable}
 import com.akka.utils.HashUtils
 
@@ -33,10 +33,16 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       log.info("Hashed set : {}", serverActorHashedTreeSet)
       log.info("Context paths : {}", contextPaths)
 
+      if (contextPaths.size > maxNodesInRing) {
+        sender() ! contextPaths.size
+      }
+
+
+
     case LoadFileToServer(data) =>
       val dataHashedValue = HashUtils.generateHash(data.id.toString, maxNodesInRing, "SHA-1")
       log.info("Size of server actor hashed tree set : {}", serverActorHashedTreeSet.size)
- /*     val tempTreeSet = serverActorHashedTreeSet.filter(x => x > dataHashedValue.toInt)
+      val tempTreeSet = serverActorHashedTreeSet.filter(x => x > dataHashedValue.toInt)
       val serverHash = if (tempTreeSet.nonEmpty) {
         tempTreeSet.head
       } else {
@@ -44,7 +50,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       }
       val serverActor = context.system.actorSelection(mapContextToHash(serverHash))
       serverActor ! LoadData(data)
- */ }
+  }
 }
 
 object MasterActor {
@@ -52,5 +58,7 @@ object MasterActor {
   sealed case class AddNodeToRing(hashKey: String, serverActorPath: String)
 
   sealed case class LoadFileToServer(data: Data)
+
+  sealed case class InitializationDone()
 
 }

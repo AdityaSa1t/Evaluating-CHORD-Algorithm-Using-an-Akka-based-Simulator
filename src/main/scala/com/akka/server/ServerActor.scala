@@ -27,10 +27,10 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       val serverActor = context.actorOf(ServerActor.serverId(serverId, maxFingerTableEntries), "server-actor-" + serverId)
       serverActor ! InitFingerTable
       log.info("Created server with path {}", serverActor.path)
-      val masterActor = context.system.actorSelection("akka://server-actor-system/user/master-actor")
+      val masterActor = context.system.actorSelection("akka://actor-system/user/master-actor")
       val hashedValue = HashUtils.generateHash(serverId.toString, maxFingerTableEntries, "SHA-1")
       serverActor ! InitFingerTable(hashedValue)
-      masterActor ! AddNodeToRing(hashedValue, serverActor.path.toString)
+      val result = masterActor ? AddNodeToRing(hashedValue, serverActor.path.toString)
 
     case UpdateFingerTable(hashedNodes) =>
       fingerTable = ServerActor.setSuccessor(hashedNodes, fingerTable)

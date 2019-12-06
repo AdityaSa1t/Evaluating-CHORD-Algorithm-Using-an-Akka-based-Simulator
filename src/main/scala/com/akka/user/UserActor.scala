@@ -19,7 +19,7 @@ class UserActor(userId: Int, serverActorSystem: ActorSystem) extends Actor with 
       to ! ProcessRequestFromUser(request)
 
     case AddFileToServer(data) =>
-      val masterActor = serverActorSystem.actorSelection("akka://server-actor-system/user/master-actor")
+      val masterActor = serverActorSystem.actorSelection("akka://actor-system/user/master-actor")
       masterActor ! LoadFileToServer(data)
   }
 
