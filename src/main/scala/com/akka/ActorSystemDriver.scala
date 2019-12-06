@@ -1,13 +1,12 @@
 package com.akka
 
 import akka.actor.{ActorSystem, Props}
-import com.akka.data.{Data, Request}
-import com.akka.dispatcher.DispatcherActor
+import com.akka.data.Data
 import com.akka.master.MasterActor
 import com.akka.server.ServerActor
 import com.akka.server.ServerActor.CreateServerActorWithId
 import com.akka.user.UserActor
-import com.akka.user.UserActor.{CreateUserActorWithId, DispatchMessageToDispatcher}
+import com.akka.user.UserActor.CreateUserActorWithId
 import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable

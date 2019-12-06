@@ -11,14 +11,14 @@ import scala.collection.mutable
 class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with ActorLogging {
 
   private val movieList: mutable.ListBuffer[String] = new mutable.ListBuffer[String]
-  private val fingerTable = new mutable.HashMap[Int, FingerTableEntry]
+  private var fingerTable = new mutable.HashMap[Int, FingerTableEntry]
 
   override def receive: Receive = {
 
     case InitFingerTable =>
       (0 until maxFingerTableEntries).foreach {
         i =>
-          fingerTable += (i -> FingerTableEntry(((serverId + scala.math.pow(2, i)) % scala.math.pow(2, maxFingerTableEntries)).asInstanceOf[Int], i))
+          fingerTable += (i -> FingerTableEntry(((serverId + scala.math.pow(2, i)) % scala.math.pow(2, maxFingerTableEntries)).asInstanceOf[Int], serverId))
       }
       log.info("Finger table built for server with path {} with size {}", context.self.path, fingerTable.size)
 
@@ -35,16 +35,11 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
 
     case UpdateFingerTable(hashedNodes) =>
       val treeSet = new mutable.TreeSet[Int]()
-
       hashedNodes.foreach {
         node =>
           treeSet += Integer.parseInt(node, 16)
       }
-
       fingerTable = ServerActor.setSuccessor(treeSet, fingerTable)
-
-
-      log.info("Update finger table of server with path {}", self.path)
 
 
   }
@@ -63,14 +58,17 @@ object ServerActor {
   def serverId(serverId: Int, maxFingerTableEntries: Int): Props = Props(new ServerActor(serverId, maxFingerTableEntries))
 
   def setSuccessor(treeSet: mutable.TreeSet[Int], fingerTableEntry: mutable.HashMap[Int, FingerTableEntry]): mutable.HashMap[Int, FingerTableEntry] = {
-  /*  fingerTableEntry.map {
-      fingerTableEntry =>
-      val tempTreeSet = treeSet.filter(x => x >= fingerTableEntry._1)
-        if (tempTreeSet.size == 1) {
-          fingerTableEntry
+    fingerTableEntry.map {
+      entry =>
+        val tempTreeSet = treeSet.filter(x => x > entry._2.successorId)
+
+        if (tempTreeSet.nonEmpty) {
+          entry._1 -> FingerTableEntry(entry._2.successorId, tempTreeSet.head)
         } else {
-          treeSet
+          entry
         }
     }
-  */}
+    fingerTableEntry
+  }
+
 }
