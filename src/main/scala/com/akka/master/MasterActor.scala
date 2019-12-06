@@ -2,7 +2,7 @@ package com.akka.master
 
 import akka.actor.{Actor, ActorLogging}
 import com.akka.data.Data
-import com.akka.master.MasterActor.{AddNodeToRing, InitializationDone, LoadFileToServer}
+import com.akka.master.MasterActor.{AddNodeToRing, LoadFileToServer}
 import com.akka.server.ServerActor.{LoadData, UpdateFingerTable}
 import com.akka.utils.HashUtils
 
@@ -33,10 +33,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       log.info("Hashed set : {}", serverActorHashedTreeSet)
       log.info("Context paths : {}", contextPaths)
 
-      if (contextPaths.size > maxNodesInRing) {
-        sender() ! contextPaths.size
-      }
-
+      sender() ! contextPaths.size
 
 
     case LoadFileToServer(data) =>
