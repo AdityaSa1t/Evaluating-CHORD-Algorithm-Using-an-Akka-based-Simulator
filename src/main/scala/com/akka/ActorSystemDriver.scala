@@ -100,7 +100,7 @@ object ActorSystemDriver {
       masterActor ! CreateSnapshot
     }
 
-    
+
 
     try {
       // Detect an external input to move to a new line
