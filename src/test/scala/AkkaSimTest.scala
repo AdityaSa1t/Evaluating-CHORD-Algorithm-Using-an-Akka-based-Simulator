@@ -1,9 +1,8 @@
 import akka.actor.{ActorPath, ActorSystem, Props}
 import akka.testkit.{TestKit, TestProbe}
 import com.akka.master.MasterActor
-
-import com.akka.user.{DataUtil, UserActor}
-import com.akka.utils.HashUtils
+import com.akka.user.UserActor
+import com.akka.utils.{DataUtil, HashUtils}
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, MustMatchers}
 
 class FirstAkkaTest extends TestKit(ActorSystem("test-system"))

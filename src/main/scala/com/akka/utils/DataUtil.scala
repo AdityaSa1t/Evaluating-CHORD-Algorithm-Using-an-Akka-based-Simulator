@@ -1,10 +1,13 @@
-package com.akka.user
+package com.akka.utils
 
 import com.akka.data.Data
 
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
+/**
+ * A utility class which reads records from the csv file.
+ **/
 object DataUtil extends App {
 
   def returnData: List[Data] = {
@@ -20,4 +23,3 @@ object DataUtil extends App {
     resData.toList
   }
 }
-

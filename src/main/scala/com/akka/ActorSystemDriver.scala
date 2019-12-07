@@ -9,7 +9,8 @@ import com.akka.master.MasterActor.CreateSnapshot
 import com.akka.server.ServerActor
 import com.akka.server.ServerActor.CreateServerActorWithId
 import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId, LookUpData}
-import com.akka.user.{DataUtil, UserActor}
+import com.akka.user.UserActor
+import com.akka.utils.DataUtil
 import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable
