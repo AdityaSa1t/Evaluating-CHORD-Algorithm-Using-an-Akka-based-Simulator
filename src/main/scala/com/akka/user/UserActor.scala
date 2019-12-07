@@ -21,6 +21,7 @@ class UserActor(userId: Int, serverActorSystem: ActorSystem) extends Actor with 
     case CreateUserActorWithId(userId) =>
       val userActor = context.actorOf(Props(new UserActor(userId, serverActorSystem)), "user-actor-" + userId)
       log.info("Created user actor {}", userActor.path.toString)
+      sender ! userActor.path
 
 
     case AddFileToServer(data) =>
@@ -36,7 +37,6 @@ class UserActor(userId: Int, serverActorSystem: ActorSystem) extends Actor with 
   }
 
 }
-
 
 object UserActor {
   sealed case class CreateUserActorWithId(userId: Int)
