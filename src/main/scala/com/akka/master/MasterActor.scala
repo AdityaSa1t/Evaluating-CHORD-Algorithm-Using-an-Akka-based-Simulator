@@ -3,8 +3,8 @@ package com.akka.master
 import akka.actor.{Actor, ActorLogging}
 import akka.util.Timeout
 import com.akka.data.Data
-import com.akka.master.MasterActor.{AddNodeToRing, LoadFileToServer, QueryDataFromServer, RemoveServerFromRing}
-import com.akka.server.ServerActor.{Deactivate, GetData, LoadData, UpdateFingerTable}
+import com.akka.master.MasterActor._
+import com.akka.server.ServerActor._
 import com.akka.utils.HashUtils
 
 import scala.collection.mutable
@@ -64,6 +64,14 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       val serverActor = context.system.actorSelection(contextPaths(0))
       serverActor ! GetData(data, mapContextToHash, serverActorHashedTreeSet)
 
+    case CreateSnapshot =>
+      log.info("Snapshot of total no. of servers in the ring : {}", numNodesInRing)
+      contextPaths.foreach {
+        contextPath =>
+          val serverActor = context.actorSelection(contextPath)
+          serverActor ! Snapshot
+      }
+
   }
 }
 
@@ -78,4 +86,7 @@ object MasterActor {
   sealed case class InitializationDone()
 
   sealed case class RemoveServerFromRing(serverId: Int)
+
+  sealed case class CreateSnapshot()
+
 }

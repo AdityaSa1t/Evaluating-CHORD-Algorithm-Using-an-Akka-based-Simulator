@@ -5,6 +5,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.akka.data.Data
 import com.akka.master.MasterActor
+import com.akka.master.MasterActor.CreateSnapshot
 import com.akka.server.ServerActor
 import com.akka.server.ServerActor.CreateServerActorWithId
 import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId, LookUpData}
@@ -86,10 +87,20 @@ object ActorSystemDriver {
       if (resultForAdd.nonEmpty) {
 
         userActor ! LookUpData(movies(13))
+        userActor ! LookUpData(movies(23))
+        userActor ! LookUpData(movies(3))
+        userActor ! LookUpData(movies(48))
+        userActor ! LookUpData(movies(9))
+        userActor ! LookUpData(movies(37))
+
       }
     }
 
+    if (result > 0) {
+      masterActor ! CreateSnapshot
+    }
 
+    
 
     try {
       // Detect an external input to move to a new line

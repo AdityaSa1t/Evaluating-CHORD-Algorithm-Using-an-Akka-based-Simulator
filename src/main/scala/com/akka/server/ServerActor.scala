@@ -82,6 +82,10 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
         }
       }
 
+    case Snapshot =>
+      log.info("Snapshot of finger table of server with path {} : {}", context.self.path, fingerTable)
+      log.info("Snapshot of data on server with path {} : {}", context.self.path, movieList)
+
 
   }
 }
@@ -99,6 +103,8 @@ object ServerActor {
   sealed case class GetData(data: Data, serverToContextMap: mutable.HashMap[Int, String], serverActorHashedTreeSet: mutable.TreeSet[Int])
 
   sealed case class Deactivate(serverId: Int)
+
+  sealed case class Snapshot()
 
   def serverId(serverId: Int, maxFingerTableEntries: Int): Props = Props(new ServerActor(serverId, maxFingerTableEntries))
 
