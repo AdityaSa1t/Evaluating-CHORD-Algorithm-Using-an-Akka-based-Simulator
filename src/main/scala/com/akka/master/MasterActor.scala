@@ -1,12 +1,17 @@
 package com.akka.master
 
 import akka.actor.{Actor, ActorLogging}
+import akka.util.Timeout
 import com.akka.data.Data
-import com.akka.master.MasterActor.{AddNodeToRing, LoadFileToServer}
-import com.akka.server.ServerActor.{LoadData, UpdateFingerTable}
+import com.akka.master.MasterActor.{AddNodeToRing, LoadFileToServer, QueryDataFromServer}
+import com.akka.server.ServerActor.{GetData, LoadData, UpdateFingerTable}
 import com.akka.utils.HashUtils
 
 import scala.collection.mutable
+import scala.concurrent.Await
+import akka.pattern.ask
+import scala.concurrent.duration._
+
 
 class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
 
@@ -14,6 +19,8 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
   private val serverActorHashedTreeSet = new mutable.TreeSet[Int]()
   private val contextPaths = new mutable.ListBuffer[String]
   private val mapContextToHash = new mutable.HashMap[Int, String]()
+  implicit val timeout = Timeout(5 seconds)
+
 
   override def receive: Receive = {
     case AddNodeToRing(hashKey, serverActorPath) =>
@@ -46,7 +53,15 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
         serverActorHashedTreeSet.head
       }
       val serverActor = context.system.actorSelection(mapContextToHash(serverHash))
-      serverActor ! LoadData(data)
+      val future = serverActor ? LoadData(data)
+      val result = Await.result(future, timeout.duration)
+      sender() ! result
+
+
+    case QueryDataFromServer(data) =>
+      log.info("Querying data {} from server", data)
+      val serverActor = context.system.actorSelection(contextPaths(0))
+      serverActor ! GetData(data, mapContextToHash, serverActorHashedTreeSet)
   }
 }
 
@@ -55,6 +70,8 @@ object MasterActor {
   sealed case class AddNodeToRing(hashKey: String, serverActorPath: String)
 
   sealed case class LoadFileToServer(data: Data)
+
+  sealed case class QueryDataFromServer(data: Data)
 
   sealed case class InitializationDone()
 

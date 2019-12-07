@@ -7,12 +7,12 @@ import com.akka.data.Data
 import com.akka.master.MasterActor
 import com.akka.server.ServerActor
 import com.akka.server.ServerActor.CreateServerActorWithId
-import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId}
+import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId, LookUpData}
 import com.akka.user.{DataUtil, UserActor}
 import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.io.StdIn
@@ -37,7 +37,7 @@ object ActorSystemDriver {
 
     movies.indices.foreach {
       i =>
-        movieData += Data(i, movies(i).movieName)
+        movieData += Data(i + 1000, movies(i).movieName)
     }
 
 
@@ -68,19 +68,49 @@ object ActorSystemDriver {
     if (result > 0) {
 
       val userActor = actorSystem.actorSelection("akka://actor-system/user/user-actor-supervisor/user-actor-3")
-      userActor ! AddFileToServer(movieData(3))
-      userActor ! AddFileToServer(movieData(23))
-      userActor ! AddFileToServer(movieData(13))
-      userActor ! AddFileToServer(movieData(31))
-      userActor ! AddFileToServer(movieData(4))
-      userActor ! AddFileToServer(movieData(0))
-      userActor ! AddFileToServer(movieData(30))
-      userActor ! AddFileToServer(movieData(41))
-      userActor ! AddFileToServer(movieData(69))
-      userActor ! AddFileToServer(movieData(15))
-      userActor ! AddFileToServer(movieData(5))
-      userActor ! AddFileToServer(movieData(7))
+      val futureForAdd = userActor ? AddFileToServer(movieData(3))
+      userActor ? AddFileToServer(movieData(23))
+      userActor ? AddFileToServer(movieData(13))
+      userActor ? AddFileToServer(movieData(14))
+      userActor ? AddFileToServer(movieData(15))
+      userActor ? AddFileToServer(movieData(16))
+      userActor ? AddFileToServer(movieData(27))
+      userActor ? AddFileToServer(movieData(37))
+      userActor ? AddFileToServer(movieData(9))
+      userActor ? AddFileToServer(movieData(50))
+      userActor ? AddFileToServer(movieData(51))
+      userActor ? AddFileToServer(movieData(48))
+
+
+
+
+      val resultForAdd = Await.result(futureForAdd, timeout.duration).asInstanceOf[ListBuffer[Data]]
+
+      println(resultForAdd)
+
+      if (resultForAdd.nonEmpty) {
+
+        userActor ! LookUpData(movieData(48))
+        userActor ! LookUpData(movieData(9))
+        userActor ! LookUpData(movieData(37))
+        userActor ! LookUpData(movieData(27))
+        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movieData(51))
+
+
+
+
+
+      }
+
     }
+
 
 
     try {

@@ -16,6 +16,7 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
 
   private val movieList: mutable.ListBuffer[Data] = new mutable.ListBuffer[Data]
   private var fingerTable = new mutable.HashMap[Int, FingerTableEntry]
+  private var hashedValue: Int = -1
 
   implicit val timeout = Timeout(5 seconds)
 
@@ -27,7 +28,8 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
         i =>
           fingerTable += (i -> FingerTableEntry(((hashedValue.toInt + scala.math.pow(2, i)) % scala.math.pow(2, maxFingerTableEntries)).asInstanceOf[Int], hashedValue.toInt))
       }
-      log.info("Finger table built for server with path {} with size {}", context.self.path, fingerTable.size)
+      this.hashedValue = hashedValue.toInt
+    //log.info("Finger table built for server with path {} with size {}", context.self.path, fingerTable)
 
 
     case CreateServerActorWithId(serverId, maxFingerTableEntries) =>
@@ -35,23 +37,51 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       serverActor ! InitFingerTable
       log.info("Created server with path {}", serverActor.path)
       val masterActor = context.system.actorSelection("akka://actor-system/user/master-actor")
-      val hashedValue = HashUtils.generateHash(serverId.toString, maxFingerTableEntries, "SHA-1")
-      serverActor ! InitFingerTable(hashedValue)
+      hashedValue = HashUtils.generateHash(serverId.toString, maxFingerTableEntries, "SHA-1").toInt
+      serverActor ! InitFingerTable(hashedValue.toString)
 
-      val numNodes = masterActor ? AddNodeToRing(hashedValue, serverActor.path.toString)
+      val numNodes = masterActor ? AddNodeToRing(hashedValue.toString, serverActor.path.toString)
 
       val result = Await.result(numNodes, timeout.duration)
       sender() ! result
 
-
     case UpdateFingerTable(hashedNodes) =>
       fingerTable = ServerActor.setSuccessor(hashedNodes, fingerTable)
+      log.info("Finger table updated : {}", fingerTable)
 
     case LoadData(data) =>
       movieList += data
-      log.info("Loaded data in server with path {}", context.self.path)
+      log.info("Loaded data {} in server with path {}", data, context.self.path)
+      sender() ! movieList
 
+    case GetData(data, serverToContextMap, serverActorHashedTreeSet) =>
+      val hashedDataVal = HashUtils.generateHash(data.id.toString, maxFingerTableEntries, "SHA-1").toInt
+      val self = context.self.path
+      if (movieList.contains(data)) {
+        log.info("Found data {} in server {}", data, context.self.path)
+      } else {
+        val possibleDestinations = fingerTable.map {
+          entry =>
+            entry._2.actualSuccessorId
+        }.toList.filter(x => x >= hashedDataVal).sorted
 
+        if (possibleDestinations.nonEmpty && possibleDestinations.head >= hashedDataVal) {
+          val serverActor = context.system.actorSelection(serverToContextMap(possibleDestinations.head))
+          serverActor ! GetData(data, serverToContextMap, serverActorHashedTreeSet)
+        }
+        if (possibleDestinations.isEmpty) {
+
+          val tempTreeSet = serverActorHashedTreeSet.filter(x => x > hashedValue)
+
+          if (tempTreeSet.isEmpty) {
+            val serverActor = context.system.actorSelection(serverToContextMap(serverActorHashedTreeSet.head))
+            serverActor ! GetData(data, serverToContextMap, serverActorHashedTreeSet)
+          } else {
+            val serverActor = context.system.actorSelection(serverToContextMap(tempTreeSet.head))
+            serverActor ! GetData(data, serverToContextMap, serverActorHashedTreeSet)
+          }
+        }
+      }
   }
 }
 
@@ -64,6 +94,8 @@ object ServerActor {
   sealed case class UpdateFingerTable(hashedNodes: mutable.TreeSet[Int])
 
   sealed case class LoadData(data: Data)
+
+  sealed case class GetData(data: Data, serverToContextMap: mutable.HashMap[Int, String], serverActorHashedTreeSet: mutable.TreeSet[Int])
 
   def serverId(serverId: Int, maxFingerTableEntries: Int): Props = Props(new ServerActor(serverId, maxFingerTableEntries))
 
