@@ -85,25 +85,8 @@ object ActorSystemDriver {
 
       if (resultForAdd.nonEmpty) {
 
-        userActor ! LookUpData(movies(3))
-        userActor ! LookUpData(movies(23))
         userActor ! LookUpData(movies(13))
-        userActor ! LookUpData(movies(14))
-        userActor ! LookUpData(movies(15))
-        userActor ! LookUpData(movies(16))
-        userActor ! LookUpData(movies(27))
-        userActor ! LookUpData(movies(37))
-        userActor ! LookUpData(movies(9))
-        userActor ! LookUpData(movies(50))
-        userActor ! LookUpData(movies(51))
-        userActor ! LookUpData(movies(48))
-
-
-
-
-
       }
-
     }
 
 

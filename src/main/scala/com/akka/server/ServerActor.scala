@@ -29,7 +29,6 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
           fingerTable += (i -> FingerTableEntry(((hashedValue.toInt + scala.math.pow(2, i)) % scala.math.pow(2, maxFingerTableEntries)).asInstanceOf[Int], hashedValue.toInt))
       }
       this.hashedValue = hashedValue.toInt
-    //log.info("Finger table built for server with path {} with size {}", context.self.path, fingerTable)
 
 
     case CreateServerActorWithId(serverId, maxFingerTableEntries) =>
@@ -50,9 +49,9 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       log.info("Finger table updated : {}", fingerTable)
 
     case LoadData(data) =>
-      movieList += data
-      log.info("Loaded data {} in server with path {}", data, context.self.path)
-      sender() ! movieList
+        movieList += data
+        log.info("Loaded data {} in server with path {}", data, context.self.path)
+        sender() ! movieList
 
     case GetData(data, serverToContextMap, serverActorHashedTreeSet) =>
       val hashedDataVal = HashUtils.generateHash(data.id.toString, maxFingerTableEntries, "SHA-1").toInt
@@ -63,15 +62,15 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
         val possibleDestinations = fingerTable.map {
           entry =>
             entry._2.actualSuccessorId
-        }.toList.filter(x => x > hashedDataVal).sorted
+        }.toList.filter(x => x >= hashedDataVal).sorted
 
-        if (possibleDestinations.nonEmpty && possibleDestinations.head > hashedDataVal) {
+        if (possibleDestinations.nonEmpty && possibleDestinations.head >= hashedDataVal) {
           val serverActor = context.system.actorSelection(serverToContextMap(possibleDestinations.head))
           serverActor ! GetData(data, serverToContextMap, serverActorHashedTreeSet)
         }
-        if (possibleDestinations.isEmpty) {
+        else {
 
-          val tempTreeSet = serverActorHashedTreeSet.filter(x => x > hashedValue)
+          val tempTreeSet = serverActorHashedTreeSet.filter(x => x >= hashedValue)
 
           if (tempTreeSet.isEmpty) {
             val serverActor = context.system.actorSelection(serverToContextMap(serverActorHashedTreeSet.head))
@@ -82,6 +81,8 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
           }
         }
       }
+
+
   }
 }
 
@@ -96,6 +97,8 @@ object ServerActor {
   sealed case class LoadData(data: Data)
 
   sealed case class GetData(data: Data, serverToContextMap: mutable.HashMap[Int, String], serverActorHashedTreeSet: mutable.TreeSet[Int])
+
+  sealed case class Deactivate(serverId: Int)
 
   def serverId(serverId: Int, maxFingerTableEntries: Int): Props = Props(new ServerActor(serverId, maxFingerTableEntries))
 

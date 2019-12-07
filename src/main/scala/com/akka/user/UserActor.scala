@@ -1,16 +1,14 @@
 package com.akka.user
 
-import akka.actor.{Actor, ActorContext, ActorLogging, ActorPath, ActorRef, ActorSystem, Props}
-import com.akka.data.{Data, Request}
-import com.akka.dispatcher.DispatcherActor.ProcessRequestFromUser
-import com.akka.master.MasterActor.{LoadFileToServer, QueryDataFromServer}
-import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId, DispatchMessageToDispatcher, LookUpData}
-
-import scala.collection.mutable
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
+import com.akka.data.{Data, Request}
+import com.akka.master.MasterActor.{LoadFileToServer, QueryDataFromServer}
+import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId, LookUpData}
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 
 class UserActor(userId: Int, serverActorSystem: ActorSystem) extends Actor with ActorLogging {
@@ -24,10 +22,6 @@ class UserActor(userId: Int, serverActorSystem: ActorSystem) extends Actor with 
       val userActor = context.actorOf(Props(new UserActor(userId, serverActorSystem)), "user-actor-" + userId)
       log.info("Created user actor {}", userActor.path.toString)
 
-    case DispatchMessageToDispatcher(to, request) =>
-      log.info("Message received from {}", context.self.path.toString)
-      log.info("Message to be dispatched to {}", to.path.toString)
-      to ! ProcessRequestFromUser(request)
 
     case AddFileToServer(data) =>
       val masterActor = serverActorSystem.actorSelection("akka://actor-system/user/master-actor")

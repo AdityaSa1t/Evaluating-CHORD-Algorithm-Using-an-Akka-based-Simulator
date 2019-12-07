@@ -3,13 +3,14 @@ package com.akka.master
 import akka.actor.{Actor, ActorLogging}
 import akka.util.Timeout
 import com.akka.data.Data
-import com.akka.master.MasterActor.{AddNodeToRing, LoadFileToServer, QueryDataFromServer}
-import com.akka.server.ServerActor.{GetData, LoadData, UpdateFingerTable}
+import com.akka.master.MasterActor.{AddNodeToRing, LoadFileToServer, QueryDataFromServer, RemoveServerFromRing}
+import com.akka.server.ServerActor.{Deactivate, GetData, LoadData, UpdateFingerTable}
 import com.akka.utils.HashUtils
 
 import scala.collection.mutable
 import scala.concurrent.Await
 import akka.pattern.ask
+
 import scala.concurrent.duration._
 
 
@@ -46,7 +47,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
     case LoadFileToServer(data) =>
       val dataHashedValue = HashUtils.generateHash(data.id.toString, maxNodesInRing, "SHA-1")
       log.info("Size of server actor hashed tree set : {}", serverActorHashedTreeSet.size)
-      val tempTreeSet = serverActorHashedTreeSet.filter(x => x > dataHashedValue.toInt)
+      val tempTreeSet = serverActorHashedTreeSet.filter(x => x >= dataHashedValue.toInt)
       val serverHash = if (tempTreeSet.nonEmpty) {
         tempTreeSet.head
       } else {
@@ -62,6 +63,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       log.info("Querying data {} from server", data)
       val serverActor = context.system.actorSelection(contextPaths(0))
       serverActor ! GetData(data, mapContextToHash, serverActorHashedTreeSet)
+
   }
 }
 
@@ -75,4 +77,5 @@ object MasterActor {
 
   sealed case class InitializationDone()
 
+  sealed case class RemoveServerFromRing(serverId: Int)
 }
