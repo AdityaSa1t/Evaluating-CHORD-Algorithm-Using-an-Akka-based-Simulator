@@ -35,11 +35,6 @@ object ActorSystemDriver {
     val movies = DataUtil.returnData
 
 
-    movies.indices.foreach {
-      i =>
-        movieData += Data(i + 1000, movies(i).movieName)
-    }
-
 
     val numUsers = usersConf.getInt("num-users")
     val numServers = serversConf.getInt("num-servers")
@@ -68,18 +63,18 @@ object ActorSystemDriver {
     if (result > 0) {
 
       val userActor = actorSystem.actorSelection("akka://actor-system/user/user-actor-supervisor/user-actor-3")
-      val futureForAdd = userActor ? AddFileToServer(movieData(3))
-      userActor ? AddFileToServer(movieData(23))
-      userActor ? AddFileToServer(movieData(13))
-      userActor ? AddFileToServer(movieData(14))
-      userActor ? AddFileToServer(movieData(15))
-      userActor ? AddFileToServer(movieData(16))
-      userActor ? AddFileToServer(movieData(27))
-      userActor ? AddFileToServer(movieData(37))
-      userActor ? AddFileToServer(movieData(9))
-      userActor ? AddFileToServer(movieData(50))
-      userActor ? AddFileToServer(movieData(51))
-      userActor ? AddFileToServer(movieData(48))
+      val futureForAdd = userActor ? AddFileToServer(movies(3))
+      userActor ? AddFileToServer(movies(23))
+      userActor ? AddFileToServer(movies(13))
+      userActor ? AddFileToServer(movies(14))
+      userActor ? AddFileToServer(movies(15))
+      userActor ? AddFileToServer(movies(16))
+      userActor ? AddFileToServer(movies(27))
+      userActor ? AddFileToServer(movies(37))
+      userActor ? AddFileToServer(movies(9))
+      userActor ? AddFileToServer(movies(50))
+      userActor ? AddFileToServer(movies(51))
+      userActor ? AddFileToServer(movies(48))
 
 
 
@@ -90,18 +85,18 @@ object ActorSystemDriver {
 
       if (resultForAdd.nonEmpty) {
 
-        userActor ! LookUpData(movieData(48))
-        userActor ! LookUpData(movieData(9))
-        userActor ! LookUpData(movieData(37))
-        userActor ! LookUpData(movieData(27))
-        userActor ! LookUpData(movieData(51))
-        userActor ! LookUpData(movieData(51))
-        userActor ! LookUpData(movieData(51))
-        userActor ! LookUpData(movieData(51))
-        userActor ! LookUpData(movieData(51))
-        userActor ! LookUpData(movieData(51))
-        userActor ! LookUpData(movieData(51))
-        userActor ! LookUpData(movieData(51))
+        userActor ! LookUpData(movies(3))
+        userActor ! LookUpData(movies(23))
+        userActor ! LookUpData(movies(13))
+        userActor ! LookUpData(movies(14))
+        userActor ! LookUpData(movies(15))
+        userActor ! LookUpData(movies(16))
+        userActor ! LookUpData(movies(27))
+        userActor ! LookUpData(movies(37))
+        userActor ! LookUpData(movies(9))
+        userActor ! LookUpData(movies(50))
+        userActor ! LookUpData(movies(51))
+        userActor ! LookUpData(movies(48))
 
 
 

@@ -63,9 +63,9 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
         val possibleDestinations = fingerTable.map {
           entry =>
             entry._2.actualSuccessorId
-        }.toList.filter(x => x >= hashedDataVal).sorted
+        }.toList.filter(x => x > hashedDataVal).sorted
 
-        if (possibleDestinations.nonEmpty && possibleDestinations.head >= hashedDataVal) {
+        if (possibleDestinations.nonEmpty && possibleDestinations.head > hashedDataVal) {
           val serverActor = context.system.actorSelection(serverToContextMap(possibleDestinations.head))
           serverActor ! GetData(data, serverToContextMap, serverActorHashedTreeSet)
         }
