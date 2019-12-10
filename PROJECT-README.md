@@ -1,7 +1,7 @@
 # CS441 - Course Project
 
 ---
-#Project title :  To create and evaluate Chord, a cloud overlay network algorithm with consistent hashing using your own Akka/HTTP-based simulator.
+# Project title :  To create and evaluate Chord, a cloud overlay network algorithm with consistent hashing using your own Akka/HTTP-based simulator.
 
 ---
 ### Project members
@@ -59,9 +59,10 @@
         *   In this method we add a node to a ring.
     * `loadData`
         * A unit of data is loaded onto a server node  by the user.
-        * Append the request with `/id=<some positive integer>`
+        * Append the request with `?id=<some positive integer>`
     * `lookUpData`
         * A unit of data is looked up by a user on a server node using the Chord algorithm for lookup.
+        * Append the request with `?id=<some positive integer>`   
     * `createSnapshot`
         * The snapshot which comprises of information such as total no. of server nodes in the ring, finger table of each server and the data loaded onto each server is displayed.
     * The service which runs on `http://localhost:8080` displays 4 hyperlinks corresponding to the above methods respectively. 
