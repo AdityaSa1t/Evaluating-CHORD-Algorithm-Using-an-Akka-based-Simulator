@@ -8,7 +8,7 @@ import scala.io.Source
 /**
  * A utility class which reads records from the csv file.
  **/
-object DataUtil extends App {
+object DataUtil{
 
   def returnData: List[Data] = {
     val res: ListBuffer[String] = new ListBuffer[String]

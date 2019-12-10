@@ -3,7 +3,6 @@ package com.akka
 import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.akka.ActorSystemDriver.{logger, numServersCreated}
 import com.akka.data.Data
 import com.akka.master.MasterActor
 import com.akka.master.MasterActor.CreateSnapshot
@@ -19,7 +18,6 @@ import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.io.StdIn
 
 /**
   * This singleton class represents a driver class which creates a system of Akka actors.
@@ -80,9 +78,17 @@ object ActorSystemDriver extends LazyLogging {
     userActor ! AddFileToServer(movieData(movie_index))
   }
 
-  def lookUpData(movie_id: Int): Unit = {
+  def lookUpData(movie_id: Int): Any = {
     val userActor = actorSystem.actorSelection("akka://actor-system/user/user-actor-supervisor/user-actor-3")
-    userActor ! LookUpData(movies(movie_id))
+    val data = userActor ? LookUpData(movies(movie_id))
+    val result = Await.result(data, timeout.duration)
+    result
+  }
+
+  def getSnapshot(): Any = {
+    val snap_data = masterActor ? CreateSnapshot
+    val result = Await.result(snap_data, timeout.duration)
+    result
   }
 
 }

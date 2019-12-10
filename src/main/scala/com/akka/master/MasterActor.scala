@@ -62,16 +62,23 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
     case QueryDataFromServer(data) =>
       log.info("Querying data {} from server", data)
       val serverActor = context.system.actorSelection(contextPaths(0))
-      serverActor ! GetData(data, mapContextToHash, serverActorHashedTreeSet)
+      val future_data = serverActor ? GetData(data, mapContextToHash, serverActorHashedTreeSet)
+      val result = Await.result(future_data, timeout.duration)
+      sender() ! result
 
     case CreateSnapshot =>
+      val snapshotData: mutable.ListBuffer[String] = new mutable.ListBuffer[String]()
       log.info("Snapshot of total no. of servers in the ring : {}", numNodesInRing)
       contextPaths.foreach {
         contextPath =>
           val serverActor = context.actorSelection(contextPath)
-          serverActor ! Snapshot
+          var snapData =  (serverActor ? Snapshot)
+          var result = Await.result(snapData, timeout.duration)
+          snapshotData += result.toString
       }
 
+
+      sender() ! snapshotData
   }
 }
 

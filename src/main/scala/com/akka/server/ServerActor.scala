@@ -49,15 +49,17 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       log.info("Finger table updated : {}", fingerTable)
 
     case LoadData(data) =>
-        movieList += data
-        log.info("Loaded data {} in server with path {}", data, context.self.path)
-        sender() ! movieList
+      movieList += data
+      log.info("Loaded data {} in server with path {}", data, context.self.path)
+      sender() ! movieList
 
     case GetData(data, serverToContextMap, serverActorHashedTreeSet) =>
       val hashedDataVal = HashUtils.generateHash(data.id.toString, maxFingerTableEntries, "SHA-1").toInt
       val self = context.self.path
       if (movieList.contains(data)) {
         log.info("Found data {} in server {}", data, context.self.path)
+        val server_path = context.self.path.toString
+        sender() ! server_path
       } else {
         val possibleDestinations = fingerTable.map {
           entry =>
@@ -86,7 +88,9 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       log.info("Snapshot of finger table of server with path {} : {}", context.self.path, fingerTable)
       log.info("Snapshot of data on server with path {} : {}", context.self.path, movieList)
 
+      val snapshotData = "Server : " + context.self.path.toString + " with finger table : " + fingerTable.toString() + " and movie list : " + movieList.toString() + ""
 
+      sender() ! snapshotData
   }
 }
 

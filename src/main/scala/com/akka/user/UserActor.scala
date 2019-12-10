@@ -3,6 +3,7 @@ package com.akka.user
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
+import com.akka.ActorSystemDriver.timeout
 import com.akka.data.{Data, Request}
 import com.akka.master.MasterActor.{LoadFileToServer, QueryDataFromServer}
 import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId, LookUpData}
@@ -33,7 +34,10 @@ class UserActor(userId: Int, serverActorSystem: ActorSystem) extends Actor with 
 
     case LookUpData(data) =>
       val masterActor = serverActorSystem.actorSelection("akka://actor-system/user/master-actor")
-      val result = masterActor ? QueryDataFromServer(data)
+      val future_data = masterActor ? QueryDataFromServer(data)
+
+      val result = Await.result(future_data, timeout.duration)
+      sender() ! result
   }
 
 }
