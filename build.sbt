@@ -29,7 +29,11 @@ libraryDependencies ++= Seq(
 
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % "2.6.0" % Test,
 
-  "com.typesafe.akka" %% "akka-remote" % "2.6.0"
+  "com.typesafe.akka" %% "akka-remote" % "2.6.0",
+
+  "com.typesafe.akka" %% "akka-http" % "10.1.11",
+
+  "com.typesafe.akka" %% "akka-stream" % "2.6.0"
 
 )
 

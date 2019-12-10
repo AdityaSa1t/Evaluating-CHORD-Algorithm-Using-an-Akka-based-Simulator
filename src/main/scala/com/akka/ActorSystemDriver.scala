@@ -3,6 +3,7 @@ package com.akka
 import akka.actor.{ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
+import com.akka.ActorSystemDriver.{logger, numServersCreated}
 import com.akka.data.Data
 import com.akka.master.MasterActor
 import com.akka.master.MasterActor.CreateSnapshot
@@ -12,6 +13,7 @@ import com.akka.user.UserActor.{AddFileToServer, CreateUserActorWithId, LookUpDa
 import com.akka.user.UserActor
 import com.akka.utils.DataUtil
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -22,94 +24,65 @@ import scala.io.StdIn
 /**
   * This singleton class represents a driver class which creates a system of Akka actors.
   **/
-object ActorSystemDriver {
+object ActorSystemDriver extends LazyLogging {
+
 
   private val usersConf = ConfigFactory.load("users.conf").getConfig("users-conf")
   private val serversConf = ConfigFactory.load("servers.conf").getConfig("servers-conf")
   private var future: Future[Any] = _
   implicit val timeout = Timeout(5 seconds)
 
-
-  def main(args: Array[String]): Unit = {
-
-    val movieData: ArrayBuffer[Data] = new mutable.ArrayBuffer[Data]
-
-    val movies = DataUtil.returnData
+  val actorSystem = ActorSystem("actor-system")
 
 
-
-    val numUsers = usersConf.getInt("num-users")
-    val numServers = serversConf.getInt("num-servers")
-
-    val actorSystem = ActorSystem("actor-system")
-
-    val userActorSupervisor = actorSystem.actorOf(Props(new UserActor(1, actorSystem)), "user-actor-supervisor")
-    val serverActorSupervisor = actorSystem.actorOf(Props(new ServerActor(1, numServers)), "server-actor-supervisor")
-    val masterActor = actorSystem.actorOf(Props(new MasterActor(numServers)), "master-actor")
+  val numUsers = usersConf.getInt("num-users")
+  val numServers = serversConf.getInt("num-servers")
+  var numServersCreated = 0
 
 
-    (1 to numUsers).foreach {
-      i =>
-        userActorSupervisor ! CreateUserActorWithId(i + 1)
-    }
+  val userActorSupervisor = actorSystem.actorOf(Props(new UserActor(1, actorSystem)), "user-actor-supervisor")
+  val serverActorSupervisor = actorSystem.actorOf(Props(new ServerActor(1, numServers)), "server-actor-supervisor")
+  val masterActor = actorSystem.actorOf(Props(new MasterActor(numServers)), "master-actor")
+  val r = scala.util.Random
 
-
-    future = (1 to numServers).map {
-      i =>
-        serverActorSupervisor ? CreateServerActorWithId(i + 1, numServers)
-    }.last
-
-
-    val result = Await.result(future, timeout.duration).asInstanceOf[Int]
-
-    if (result > 0) {
-
-      val userActor = actorSystem.actorSelection("akka://actor-system/user/user-actor-supervisor/user-actor-3")
-      val futureForAdd = userActor ? AddFileToServer(movies(3))
-      userActor ? AddFileToServer(movies(23))
-      userActor ? AddFileToServer(movies(13))
-      userActor ? AddFileToServer(movies(14))
-      userActor ? AddFileToServer(movies(15))
-      userActor ? AddFileToServer(movies(16))
-      userActor ? AddFileToServer(movies(27))
-      userActor ? AddFileToServer(movies(37))
-      userActor ? AddFileToServer(movies(9))
-      userActor ? AddFileToServer(movies(50))
-      userActor ? AddFileToServer(movies(51))
-      userActor ? AddFileToServer(movies(48))
-
-
-
-
-      val resultForAdd = Await.result(futureForAdd, timeout.duration).asInstanceOf[ListBuffer[Data]]
-
-      println(resultForAdd)
-
-      if (resultForAdd.nonEmpty) {
-
-        userActor ! LookUpData(movies(13))
-        userActor ! LookUpData(movies(23))
-        userActor ! LookUpData(movies(3))
-        userActor ! LookUpData(movies(48))
-        userActor ! LookUpData(movies(9))
-        userActor ! LookUpData(movies(37))
-
-      }
-    }
-
-    if (result > 0) {
-      masterActor ! CreateSnapshot
-    }
-
-
-
-    try {
-      // Detect an external input to move to a new line
-      StdIn.readLine
-    } finally {
-      // Terminates the user actor system
-      actorSystem.terminate
-
-    }
+  (1 to numUsers).foreach {
+    i =>
+      userActorSupervisor ! CreateUserActorWithId(i + 1)
   }
+
+  val movieData: ArrayBuffer[Data] = new mutable.ArrayBuffer[Data]
+
+  val movies = DataUtil.returnData
+
+
+  movies.indices.foreach {
+    i =>
+      movieData += Data(i, movies(i).movieName)
+  }
+
+
+  def createNode(): Boolean = {
+    if (numServersCreated < numServers) {
+      serverActorSupervisor ? CreateServerActorWithId(numServersCreated, numServers)
+      numServersCreated += 1
+      return true
+    }
+    else {
+      logger.info("Cant create more Servers!")
+    }
+
+    false
+  }
+
+  def loadData(movie_index: Int): Unit = {
+    val userActor = actorSystem.actorSelection("akka://actor-system/user/user-actor-supervisor/user-actor-3")
+    //userActor ! AddFileToServer(movieData(r.nextInt(movieData.length)))
+    userActor ! AddFileToServer(movieData(movie_index))
+  }
+
+  def lookUpData(movie_id: Int): Unit = {
+    val userActor = actorSystem.actorSelection("akka://actor-system/user/user-actor-supervisor/user-actor-3")
+    userActor ! LookUpData(movies(movie_id))
+  }
+
 }
