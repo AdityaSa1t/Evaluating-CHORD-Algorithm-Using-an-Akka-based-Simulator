@@ -6,6 +6,11 @@ scalaVersion := "2.12.8"
 
 sbtVersion := "1.1.2"
 
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case PathList("reference.conf", xs @ _*) => MergeStrategy.concat
+  case x => MergeStrategy.first
+}
 
 libraryDependencies ++= Seq(
 
@@ -41,5 +46,5 @@ libraryDependencies ++= Seq(
 
 )
 
-
-
+mainClass in(Compile, run) := Some("com.akka.WebService")
+mainClass in assembly := Some("com.akka.WebService")
