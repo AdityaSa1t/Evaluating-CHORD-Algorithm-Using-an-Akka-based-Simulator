@@ -46,5 +46,8 @@ libraryDependencies ++= Seq(
 
 )
 
+
 mainClass in(Compile, run) := Some("com.akka.WebService")
 mainClass in assembly := Some("com.akka.WebService")
+
+enablePlugins(DockerPlugin)

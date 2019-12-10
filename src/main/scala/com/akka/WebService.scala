@@ -25,6 +25,7 @@ object WebService {
     val route =
       get {
         concat(
+
           pathSingleSlash {
             ActorSystemDriver
             complete(HttpEntity(

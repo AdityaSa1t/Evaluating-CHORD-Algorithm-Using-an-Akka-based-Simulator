@@ -1,9 +1,9 @@
-import org.scalatest.{Matchers, WordSpec}
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
-import Directives._
+import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.akka.ActorSystemDriver
+import org.scalatest.{Matchers, WordSpec}
 
 class WSTest extends WordSpec with Matchers with ScalatestRouteTest {
 
