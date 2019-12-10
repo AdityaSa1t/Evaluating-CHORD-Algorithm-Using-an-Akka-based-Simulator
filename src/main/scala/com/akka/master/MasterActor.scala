@@ -44,6 +44,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       sender() ! contextPaths.size
 
 
+      // Routes user request to some server
     case LoadFileToServer(data) =>
       val dataHashedValue = HashUtils.generateHash(data.id.toString, maxNodesInRing, "SHA-1")
       log.info("Size of server actor hashed tree set : {}", serverActorHashedTreeSet.size)
@@ -59,6 +60,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       sender() ! result
 
 
+      // Routes user query for looking up some data
     case QueryDataFromServer(data) =>
       log.info("Querying data {} from server", data)
       val serverActor = context.system.actorSelection(contextPaths(0))
@@ -66,6 +68,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
       val result = Await.result(future_data, timeout.duration)
       sender() ! result
 
+      // Creates the global view of the system
     case CreateSnapshot =>
       val snapshotData: mutable.ListBuffer[String] = new mutable.ListBuffer[String]()
       log.info("Snapshot of total no. of servers in the ring : {}", numNodesInRing)

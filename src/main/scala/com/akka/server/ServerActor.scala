@@ -31,6 +31,7 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       this.hashedValue = hashedValue.toInt
 
 
+      // Creates a server with some id and finger table
     case CreateServerActorWithId(serverId, maxFingerTableEntries) =>
       val serverActor = context.actorOf(ServerActor.serverId(serverId, maxFingerTableEntries), "server-actor-" + serverId)
       serverActor ! InitFingerTable
@@ -44,15 +45,18 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
       val result = Await.result(numNodes, timeout.duration)
       sender() ! result
 
+      // Update of the finger table
     case UpdateFingerTable(hashedNodes) =>
       fingerTable = ServerActor.setSuccessor(hashedNodes, fingerTable)
       log.info("Finger table updated : {}", fingerTable)
 
+      // Loads some data
     case LoadData(data) =>
       movieList += data
       log.info("Loaded data {} in server with path {}", data, context.self.path)
       sender() ! movieList
 
+      // Either gets the data or searches for a data in accordance with the Chord algorithm
     case GetData(data, serverToContextMap, serverActorHashedTreeSet) =>
       val hashedDataVal = HashUtils.generateHash(data.id.toString, maxFingerTableEntries, "SHA-1").toInt
       val self = context.self.path
