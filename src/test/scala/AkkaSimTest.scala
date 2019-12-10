@@ -5,7 +5,7 @@ import com.akka.user.UserActor
 import com.akka.utils.{DataUtil, HashUtils}
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, MustMatchers}
 
-class FirstAkkaTest extends TestKit(ActorSystem("test-system"))
+class ActorSystemTest extends TestKit(ActorSystem("test-system"))
   with FlatSpecLike with BeforeAndAfterAll with MustMatchers {
 
   override def afterAll = {

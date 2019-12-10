@@ -5,7 +5,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.akka.ActorSystemDriver
 import org.scalatest.{Matchers, WordSpec}
 
-class WSTest extends WordSpec with Matchers with ScalatestRouteTest {
+class WebServicesTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   val content = "<html><body> <a href=\"http://127.0.0.1:8080/addNode\">1. Add a Server Node</a><br> " +
     "<a href=\"http://127.0.0.1:8080/loadData\">2. Load Data to Servers by Id</a><br> " +
