@@ -79,7 +79,8 @@ object ActorSystemDriver extends LazyLogging {
   }
 
   def lookUpData(movie_id: Int): Any = {
-    val userActor = actorSystem.actorSelection("akka://actor-system/user/user-actor-supervisor/user-actor-3")
+    val someUserPath = ConfigFactory.load("users.conf").getConfig("users-conf").getString("constant-actor")
+    val userActor = actorSystem.actorSelection(someUserPath)
     val data = userActor ? LookUpData(movies(movie_id))
     val result = Await.result(data, timeout.duration)
     result
