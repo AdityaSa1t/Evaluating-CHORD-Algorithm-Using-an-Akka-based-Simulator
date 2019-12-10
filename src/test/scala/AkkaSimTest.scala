@@ -38,7 +38,7 @@ class FirstAkkaTest extends TestKit(ActorSystem("test-system"))
     assert(state.toString.contains(index.toString) && state.isInstanceOf[ActorPath] && state.toString.contains("user"))
   }
 
-  "DataUtil" should "return a list of movies" in {
+  "DataUtil" should "return a list of unique movies" in {
     val resultList = DataUtil.returnData
     val verifyList = resultList.distinct
     assert(resultList.length > 0 && resultList == verifyList)
