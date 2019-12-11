@@ -13,7 +13,7 @@ object DataUtil{
   def returnData: List[Data] = {
     val res: ListBuffer[String] = new ListBuffer[String]
     val resData: ListBuffer[Data] = new ListBuffer[Data]
-    val lines = Source.fromFile("./src/main/resources/data.csv")
+    val lines = Source.fromResource("data.csv")
     var i: Int = 0
     for (line <- lines.getLines.drop(1)) {
       val cols = line.split(",")

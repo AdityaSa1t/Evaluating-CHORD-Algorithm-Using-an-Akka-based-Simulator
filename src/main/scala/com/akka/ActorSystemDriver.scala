@@ -22,13 +22,13 @@ import scala.concurrent.{Await, Future}
 /**
   * This singleton class represents a driver class which creates a system of Akka actors.
   **/
-object ActorSystemDriver extends LazyLogging {
+class ActorSystemDriver extends LazyLogging {
 
 
   private val usersConf = ConfigFactory.load("users.conf").getConfig("users-conf")
   private val serversConf = ConfigFactory.load("servers.conf").getConfig("servers-conf")
   private var future: Future[Any] = _
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
   val actorSystem = ActorSystem("actor-system")
 

@@ -20,7 +20,7 @@ class MasterActor(maxNodesInRing: Int) extends Actor with ActorLogging {
   private val serverActorHashedTreeSet = new mutable.TreeSet[Int]()
   private val contextPaths = new mutable.ListBuffer[String]
   private val mapContextToHash = new mutable.HashMap[Int, String]()
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
 
   override def receive: Receive = {

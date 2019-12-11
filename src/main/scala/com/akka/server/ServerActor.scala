@@ -18,7 +18,7 @@ class ServerActor(serverId: Int, maxFingerTableEntries: Int) extends Actor with 
   private var fingerTable = new mutable.HashMap[Int, FingerTableEntry]
   private var hashedValue: Int = -1
 
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
 
   override def receive: Receive = {

@@ -14,16 +14,17 @@ class WebServicesTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   val nodeAddResult = "<html><body> Added a node! <br><a href=\"http://127.0.0.1:8080/\">Go Back</a><br><br> </body></html>"
 
+  val actorSystemDriver = new ActorSystemDriver
+
   val trialRoute=get {
     concat(
       pathSingleSlash {
-        ActorSystemDriver
         complete(HttpEntity(
           ContentTypes.`text/html(UTF-8)`,content))
       },
 
       path("addNode") {
-        val result = ActorSystemDriver.createNode()
+        val result = actorSystemDriver.createNode()
 
         if (result) {
           complete(HttpResponse(entity = HttpEntity(

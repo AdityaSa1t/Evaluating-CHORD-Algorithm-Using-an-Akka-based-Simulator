@@ -19,7 +19,9 @@ object WebService {
     // needed for the future flatMap/onComplete in the end
     implicit val executionContext = system.dispatcher
 
-    implicit val timeout = Timeout(5 seconds)
+    implicit val timeout = Timeout(10 seconds)
+
+    val actorSystemDriver = new ActorSystemDriver
 
 
     val route =
@@ -27,7 +29,7 @@ object WebService {
         concat(
 
           pathSingleSlash {
-            ActorSystemDriver
+            //actorSystemDriver.ActorSystemDriver
             complete(HttpEntity(
               ContentTypes.`text/html(UTF-8)`,
               "<html><body> <a href=\"http://127.0.0.1:8080/addNode\">1. Add a Server Node</a><br> " +
@@ -40,7 +42,7 @@ object WebService {
 
           //Route definition for adding a node to the server.
           path("addNode") {
-            val result = ActorSystemDriver.createNode()
+            val result = actorSystemDriver.createNode()
 
             if (result) {
               serverNodeCreated = true
@@ -58,11 +60,11 @@ object WebService {
           path("loadData") {
             parameters('id) { (id) =>
               if (serverNodeCreated) {
-                if (id.toInt >= ActorSystemDriver.movieData.length) {
-                  complete("Enter id between 0 and " + (ActorSystemDriver.movieData.length - 1) + "")
+                if (id.toInt >= actorSystemDriver.movieData.length) {
+                  complete("Enter id between 0 and " + (actorSystemDriver.movieData.length - 1) + "")
                 }
                 else {
-                  ActorSystemDriver.loadData(id.toInt)
+                  actorSystemDriver.loadData(id.toInt)
                   complete(HttpResponse(entity = HttpEntity(
                     ContentTypes.`text/html(UTF-8)`,
                     "<html><body> Loaded Data. <br><a href=\"http://127.0.0.1:8080/\">Go Back</a><br> </body></html>")))
@@ -81,7 +83,7 @@ object WebService {
           path("lookupData") {
             parameters('id) { (id) =>
               if (serverNodeCreated) {
-                val result = ActorSystemDriver.lookUpData(id.toInt)
+                val result = actorSystemDriver.lookUpData(id.toInt)
 
                 complete(HttpResponse(entity = HttpEntity(
                   ContentTypes.`text/html(UTF-8)`,
@@ -101,7 +103,7 @@ object WebService {
           path("getSnapshot") {
 
             if (serverNodeCreated) {
-              val result = ActorSystemDriver.getSnapshot()
+              val result = actorSystemDriver.getSnapshot
 
               complete(HttpResponse(entity = HttpEntity(
                 ContentTypes.`text/html(UTF-8)`,
