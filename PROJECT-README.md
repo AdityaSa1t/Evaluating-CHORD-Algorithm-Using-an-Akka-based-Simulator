@@ -25,7 +25,7 @@
 * The console log generated would give a link on which the web service would be booted at `http://localhost:8080`
 
 ### Docker
-* The docker image of our simulator is hosted on dockerhub with id: saurabhvijaysingh/cs441-course-project:latest
+* The docker image of our simulator is hosted on dockerhub with id: saurabhvijaysingh/cs_441_course_project_chord:submission
 * To pull the docker image to local- `docker pull saurabhvijaysingh/cs_441_course_project_chord:submission`
 * To run the docker image - `docker run -t -p 8080:8080 --name cs441-chord-container saurabhvijaysingh/cs_441_course_project_chord:submission`
 
