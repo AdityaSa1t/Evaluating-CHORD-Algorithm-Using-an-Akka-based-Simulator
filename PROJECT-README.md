@@ -26,8 +26,8 @@
 
 ### Docker
 * The docker image of our simulator is hosted on dockerhub with id: saurabhvijaysingh/cs441-course-project:latest
-* To pull the docker image to local- `docker pull saurabhvijaysingh/cs441-course-project:latest`
-* To run the docker image - `docker run -t -p 8080:8080 --name cs441-container saurabhvijaysingh/cs441-course-project`
+* To pull the docker image to local- `docker pull saurabhvijaysingh/cs_441_course_project_chord:submission`
+* To run the docker image - `docker run -t -p 8080:8080 --name cs441-chord-container saurabhvijaysingh/cs_441_course_project_chord:submission`
 
 ### Features and code flow
 
@@ -98,8 +98,7 @@
 ```
 ListBuffer(Server : akka://actor-system/user/server-actor-supervisor/server-actor-7 with finger table : Map(8 -> FingerTableEntry(18709,18453), 11 -> FingerTableEntry(20501,18453), 2 -> FingerTableEntry(18457,18453), 5 -> FingerTableEntry(18485,18453), 14 -> FingerTableEntry(2069,18453), 13 -> FingerTableEntry(26645,18453), 4 -> FingerTableEntry(18469,18453), 7 -> FingerTableEntry(18581,18453), 1 -> FingerTableEntry(18455,18453), 10 -> FingerTableEntry(19477,18453), 9 -> FingerTableEntry(18965,18453), 3 -> FingerTableEntry(18461,18453), 12 -> FingerTableEntry(22549,18453), 6 -> FingerTableEntry(18517,18453), 0 -> FingerTableEntry(18454,18453)) and movie list : ListBuffer(Data(1,You Will Meet a Tall Dark Stranger)))
 ```
-### Future improvements
-* The docker container executes fine, but we are not able to access the localhost:8080 gateway. We suspect that it is mostly due to improper port configuration/ mapping of the container with the host. We aim to fix this. 
+### Future improvements 
 * To simulate a load testing scenario where the no. of users, no. of servers and the amount of data is randomized. This along with scheduling failures of server nodes, read/ write ratio of each user etc.
 
 
