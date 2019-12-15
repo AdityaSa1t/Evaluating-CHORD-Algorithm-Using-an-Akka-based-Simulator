@@ -1,0 +1,9 @@
+Hello Team,
+
+Good job with your simulation. All operations on the network are well exposed throught rest endpoints. 
+Could have added a simulated load with user requests based on the network size.
+
+Your grades are updated on blackboard. (You will access them when they are released)
+
+Regards,
+Mohammed Siddiq.
